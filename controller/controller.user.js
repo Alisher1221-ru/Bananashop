@@ -35,30 +35,44 @@ async function createUser(req, res) {
     }
 }
 
-async function getUsers(req, res) {
+async function login(req, res) {
     try {
         const {username, firstname, email, phone, password} = req.body
         if (!username || !firstname || !email || !phone || !password) {
             const error = new Error("sending error")
-            error.status = 401
+            error.status = 403
             throw error
         }
         const [[user]] = await db.query("SELECT * FROM users WHERE email = ?", email)
         if (!user) {
             const error = new Error("there is a user")
-            error.status = 401
+            error.status = 403
             throw error
         }
-        const refreshToken = sign({id: user.id, role: user.role}, env.REFRESH_TOKEN, {expiresIn: "30day"})
-        const accessToken = sign({id: user.id, role: user.role}, env.ACCESS_TOKEN, {expiresIn: "5m"})
-        
+        const ispasswordTest = compareSync(password, user.password)
+        if (!ispasswordTest) {
+            const error = new Error("not found")
+            error.status = 403
+            throw error
+        }
+
+        const refreshToken = sign({id: user.id, role: "user"}, env.REFRESH_TOKEN, {expiresIn: "30day"})
+        const accessToken = sign({id: user.id, role: "user"}, env.ACCESS_TOKEN, {expiresIn: "10m"})
+
+        const hashingToken = hashSync(refreshToken, 2)
         const hashingPassword = hashSync(password, 2)
 
-        const hashedRefreshToken = hashSync(refreshToken, 2)
+        await db.query("UPDATE users SET refresh_token = ?, password = ? WHERE id = ?", [hashingToken, hashingPassword, user.id])
+        res.json({refreshToken, accessToken})
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
+}
 
-        await db.query("UPDATE users SET refresh_token = ?, password = ? WHERE id = ?", [hashedRefreshToken, hashingPassword, user.id])
-
-        res.json({accessToken, refreshToken})
+async function getUsers(req, res) {
+    try {
+        const [users] = await db.query("SELECT * FROM users")
+        res.json(users)
     } catch (error) {
         console.log(error);
         res.status(500).json({error: error.message})
@@ -83,40 +97,35 @@ async function getUser(req, res) {
 
 async function updateUser(req, res) {
     try {
-        const {username, firstname, email, phone, password} = req.body
-        if (!username || !firstname || !email || !phone || !password) {
+        const body = req.body
+        if (!body) {
             const error = new Error("sending error")
-            error.status = 401
+            error.status = 403
             throw error
         }
-
         const id = req.params.id
-        
-        const [[user]] = await db.query("SELECT * FROM users WHERE email = ?", email)
+        const [[user]] = await db.query("SELECT * FROM users WHERE id = ?", id)
         if (!user) {
-            const error = new Error("there is a user")
-            error.status = 401
+            const error = new Error("not found")
+            error.status = 403
             throw error
         }
-        
-        const ispasswortTest = compareSync(password, user.password)
-        if (!ispasswortTest) {
-            const error = new Error("wrong password")
-            error.status = 401
+        if (req.role === "user") {
+            db.query("UPDATE users SET ?", body)
+            res.json(user)
+        }
+        else if(req.role === "admin") {
+            db.query("UPDATE users SET ?", body)
+            res.json(user)
+        }
+        else{
+            const error = new Error("not found")
+            error.status = 403
             throw error
         }
-        if (user.role === "user" || user.role === null) {
-            if (!user.id === id) {
-                const error = new Error("wrong id")
-                error.status = 401
-                throw error
-            }
-            
-        }
-        res.json(id)
     } catch (error) {
         console.log(error);
         res.status(500).json({error: error.message})
     }
 }
-export {createUser, getUsers, getUser, updateUser}
+export {createUser, login, getUsers, getUser, updateUser}

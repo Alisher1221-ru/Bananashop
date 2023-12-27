@@ -1,14 +1,14 @@
 import {Router} from 'express'
-import { createUser, getUsers, getUser, updateUser } from '../controller/controller.user.js'
+import { createUser, getUsers, getUser, updateUser, login } from '../controller/controller.user.js'
+import authGuard from '../middleware/user.middleware.js'
 
 const userRoute = Router()
 
-userRoute.post('/', createUser)
-userRoute.get('/:id', getUser)
-userRoute.get('/', getUsers)
-userRoute.patch('/:id', updateUser)
-// userRoute.delete('/:id', authGuard(), getUser)
+userRoute.post('/signin', authGuard, createUser)
+userRoute.post('/login', authGuard, login)
+userRoute.get('/:id', authGuard, getUser)
+userRoute.get('/', authGuard, getUsers)
+userRoute.patch('/:id', authGuard, updateUser)
+userRoute.delete('/delet:id', authGuard, getUser)
 
 export default userRoute
-
-// authGuard("admin, user, moderator")
