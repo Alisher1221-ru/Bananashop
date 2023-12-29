@@ -26,7 +26,7 @@ async function createUser(req, res) {
 
         const hashedRefreshToken = hashSync(refreshToken, 2)
 
-        await db.query("UPDATE users SET refresh_token = ?, password = ? WHERE id = ?", [hashedRefreshToken, hashingPassword, insertId])
+        await db.query("UPDATE users SET role = ?, refresh_token = ?, password = ? WHERE id = ?", ["user", hashedRefreshToken, hashingPassword, insertId])
 
         res.json({accessToken, refreshToken})
     } catch (error) {
@@ -37,8 +37,8 @@ async function createUser(req, res) {
 
 async function login(req, res) {
     try {
-        const {username, firstname, email, phone, password} = req.body
-        if (!username || !firstname || !email || !phone || !password) {
+        const {username, email, password} = req.body
+        if (!username || !email || !password) {
             const error = new Error("sending error")
             error.status = 403
             throw error
@@ -51,7 +51,7 @@ async function login(req, res) {
         }
         const ispasswordTest = compareSync(password, user.password)
         if (!ispasswordTest) {
-            const error = new Error("not found")
+            const error = new Error("wrong password")
             error.status = 403
             throw error
         }
@@ -62,8 +62,22 @@ async function login(req, res) {
         const hashingToken = hashSync(refreshToken, 2)
         const hashingPassword = hashSync(password, 2)
 
-        await db.query("UPDATE users SET refresh_token = ?, password = ? WHERE id = ?", [hashingToken, hashingPassword, user.id])
+        await db.query("UPDATE users SET refresh_token = ?, password = ? WHERE id = ?", [hashingToken, hashingPassword, "user"])
         res.json({refreshToken, accessToken})
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
+}
+
+async function refreshUser(req, res) {
+    try {
+        const {refresh_token} = req.body
+        if (!refresh_token) {
+            const error = new Error("is error || wrong token")
+            error.status = 403
+            throw error
+        }
+        await db.query("SELECT * FROM")
     } catch (error) {
         res.status(500).json({error: error.message})
     }
@@ -110,16 +124,25 @@ async function updateUser(req, res) {
             error.status = 403
             throw error
         }
-        if (req.role === "user") {
-            db.query("UPDATE users SET ?", body)
-            res.json(user)
+        const isPasswordTest = compareSync(body.password, user.password)
+        if(!isPasswordTest){
+            const error = new Error("is error || wrong password")
+            error.status = 403
+            throw error
+        }
+
+        if (req.role === "user" || req.id === user.id) {
+            const hashingPassword = hashSync(body.password, 2)
+            db.query("UPDATE users SET ?, password = ? WHERE id = ?", [body, hashingPassword, user.id])
+            res.json(user.username + " the user has been updated")
         }
         else if(req.role === "admin") {
-            db.query("UPDATE users SET ?", body)
-            res.json(user)
+            const hashingPassword = hashSync(body.password, 2)
+            db.query("UPDATE users SET ?, password = ? WHERE id = ?", [body, hashingPassword, user.id])
+            res.json(user.username + " the user has been updated")
         }
         else{
-            const error = new Error("not found")
+            const error = new Error("error")
             error.status = 403
             throw error
         }
@@ -128,4 +151,45 @@ async function updateUser(req, res) {
         res.status(500).json({error: error.message})
     }
 }
-export {createUser, login, getUsers, getUser, updateUser}
+
+async function deleteUser(req, res) {
+    try {
+        const body = req.body
+        if (!body) {
+            const error = new Error("sending error")
+            error.status = 403
+            throw error
+        }
+        const id = req.params.id
+        const [[user]] = await db.query("SELECT * FROM users WHERE id = ?", id)
+        if (!user) {
+            const error = new Error("not found")
+            error.status = 403
+            throw error
+        }
+        const isPasswordTest = compareSync(body.password, user.password)
+        if(!isPasswordTest){
+            const error = new Error("is error || wrong password")
+            error.status = 403
+            throw error
+        }
+
+        if (req.role === "user" || req.id === user.id) {
+            db.query("DELETE FROM users WHERE id = ?", [user.id])
+            res.json(user.username + " user has been deleted")
+        }
+        else if(req.role === "admin") {
+            db.query("DELETE FROM users WHERE id = ?", [user.id])
+            res.json(user.username + " user has been deleted")
+        }
+        else{
+            const error = new Error("error")
+            error.status = 403
+            throw error
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({error: error.message})
+    }
+}
+export {createUser, login, getUsers, getUser, updateUser, deleteUser}
