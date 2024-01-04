@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(255),
   `refresh_token` varchar(255),
   `phone` varchar(255),
+  `password` varchar(255),
   `created_at` datetime DEFAULT NOW(),
   `updated_at` datetime DEFAULT NOW()
 );
@@ -136,7 +137,6 @@ CREATE TABLE IF NOT EXISTS `product_event` (
 ALTER TABLE `product_event` ADD FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `product_event` ADD FOREIGN KEY (`event_id`) REFERENCES `event` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
 
 ALTER TABLE `category` ADD FOREIGN KEY (`parent_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
