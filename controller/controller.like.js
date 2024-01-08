@@ -108,7 +108,11 @@ export {
     deleteLike
 }
 
+////////// test like
+
 // {
 //     "user_id": 14,
 //     "product_id": 1
 // }
+
+//////////

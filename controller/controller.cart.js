@@ -20,7 +20,7 @@ async function createCart(req, res) {
         await db.query("INSERT INTO cart SET ?", {user_id, product_id, count})
         res.json("create cart")
     } catch (error) {
-        res.status(error.status).json({error:error.message})
+        res.status(error.status || 500).json({error:error.message})
     }
 }
 
@@ -108,8 +108,12 @@ export {
     deleteCart
 }
 
+//////////// test cart 
+
 // {
 //     "user_id": 14,
 //     "product_id": 1,
 //     "count": 2
 // }
+
+////////////

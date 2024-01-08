@@ -112,3 +112,18 @@ export {
     updateAdress,
     deleteAdress
 }
+
+
+/////////// test adress
+
+// {
+//     "region": "Xorezm",
+//     "city": "Urganch",
+//     "street": "yangi oylalar 4-yolak",
+//     "house": 14,
+//     "room": "null",
+//     "name": "naruto",
+//     "user_id": 4
+// }
+
+///////////
