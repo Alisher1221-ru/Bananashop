@@ -8,6 +8,8 @@ import likeRouter from './router/router.like.js'
 import routerCategory from './router/router.category.js'
 import routerAtrebuts from './router/router.atrebuts.js'
 import routerAttValue from './router/router.att.values.js'
+import CommentRouter from './router/router.comment.js'
+import categorys_productsCategory from './router/router.cat_prod.js'
 
 const port = env.PORT
 
@@ -22,5 +24,7 @@ appServer.use('/like', likeRouter)
 appServer.use('/attributes', routerAtrebuts)
 appServer.use('/attvalue', routerAttValue)
 appServer.use('/category', routerCategory)
+appServer.use('/categorysProducts', categorys_productsCategory)
+appServer.use('/comment', CommentRouter)
 
 appServer.listen(port, () => console.log(port+" server run"))

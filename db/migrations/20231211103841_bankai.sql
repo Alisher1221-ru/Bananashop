@@ -44,7 +44,6 @@ CREATE TABLE IF NOT EXISTS `category` (
   `name_ru` varchar(255),
   `desc_shop_uz` varchar(255),
   `desc_shop_ru` varchar(255),
-  `product_id` varchar(255),
   `atrebuts_id` varchar(255),
   `created_at` datetime DEFAULT NOW(),
   `updated_at` datetime DEFAULT NOW(),
@@ -133,6 +132,16 @@ CREATE TABLE IF NOT EXISTS `product_event` (
   `event_id` integer,
   PRIMARY KEY (`product_id`, `event_id`)
 );
+
+CREATE TABLE IF NOT EXISTS `categorys_products` (
+  `product_id` integer,
+  `category_id` integer,
+  PRIMARY KEY (`product_id`, `category_id`)
+);
+
+ALTER TABLE `categorys_products` ADD FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `categorys_products` ADD FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `product_event` ADD FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
