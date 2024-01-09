@@ -17,7 +17,7 @@ async function createAdress(req, res){
         await db.query("INSERT INTO adress SET ?", {region, city, street, house, room, name, user_id})
         res.json("created adress")
     } catch (error) {
-        res.status(403).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -31,7 +31,7 @@ async function getAdresss(req, res) {
         }
         res.json(adress)
     } catch (error) {
-        res.status(403).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -51,7 +51,7 @@ async function getAdress(req, res) {
         }
         res.json(adress)
     } catch (error) {
-        res.status(403).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -75,11 +75,21 @@ async function updateAdress(req, res) {
             error.status = 403
             throw error
         }
-
-        await db.query("UPDATE adress SET ? WHERE id = ?", [body, id])
-        res.json("updated adress id = "+id)
+        if (req.role === "admin") {
+            await db.query("UPDATE adress SET ? WHERE id = ?", [body, id])
+            res.json("updated adress id = "+id)
+            return
+        }
+        if (req.id === adress.user_id) {
+            await db.query("UPDATE adress SET ? WHERE id = ?", [body, id])
+            res.json("updated adress id = "+id)
+            return
+        }
+        const error = new Error("you are not the owner of this account")
+        error.status = 403
+        throw error
     } catch (error) {
-        res.status(403).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -98,10 +108,21 @@ async function deleteAdress(req, res) {
             throw error
         }
 
-        await db.query("DELETE FROM adress WHERE id = ?", id)
-        res.json("delete adress id = "+id)
+        if (req.role === "admin") {
+            await db.query("DELETE FROM adress WHERE id = ?", id)
+            res.json("delete adress id = "+id)
+            return
+        }
+        if (req.id === adress.user_id) {
+            await db.query("DELETE FROM adress WHERE id = ?", id)
+            res.json("delete adress id = "+id)
+            return
+        }
+        const error = new Error("you are not the owner of this account")
+        error.status = 403
+        throw error
     } catch (error) {
-        res.status(403).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 

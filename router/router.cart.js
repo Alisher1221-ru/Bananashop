@@ -5,10 +5,10 @@ import authGuard from "../middleware/user.guard.js"
 
 const cartRouter = Router()
 
-cartRouter.post('/',  authGuard, roleGuard, createCart)
+cartRouter.post('/',  authGuard, createCart)
 cartRouter.get('/:id', getCart)
 cartRouter.get('/', getCarts)
-cartRouter.patch('/:id', authGuard, roleGuard, updateCart)
-cartRouter.delete('/:id', authGuard, roleGuard, deleteCart)
+cartRouter.patch('/:id', authGuard, updateCart)
+cartRouter.delete('/:id', authGuard, deleteCart)
 
 export default cartRouter

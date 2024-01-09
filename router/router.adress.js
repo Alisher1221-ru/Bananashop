@@ -5,10 +5,10 @@ import roleGuard from "../middleware/role.guard.js"
 
 const adressRouter = Router()
 
-adressRouter.post('/', authGuard, roleGuard, createAdress)
+adressRouter.post('/', authGuard, createAdress)
 adressRouter.get('/:id', getAdress)
 adressRouter.get('/', getAdresss)
-adressRouter.patch('/:id',authGuard, roleGuard, updateAdress)
-adressRouter.delete('/:id',authGuard, roleGuard, deleteAdress)
+adressRouter.patch('/:id',authGuard, updateAdress)
+adressRouter.delete('/:id',authGuard, deleteAdress)
 
 export default adressRouter

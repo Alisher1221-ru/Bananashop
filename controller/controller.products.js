@@ -18,7 +18,7 @@ async function createProduct(req, res) {
         await db.query("INSERT INTO product SET ?", {title, price, images, name_uz, name_ru, desc_shop_uz, desc_shop_ru, desc_uz, desc_ru, discount_in_perecnt, remoining_count})
         res.json('create product')
     } catch (error) {
-        res.status(403).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -32,7 +32,7 @@ async function getProduct(req, res) {
         }
         res.json(product)
     } catch (error) {
-        res.status(403).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -52,7 +52,7 @@ async function getProducts(req, res) {
         }
         res.json(product)
     } catch (error) {
-        res.status(403).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -80,7 +80,7 @@ async function updateProduct(req, res) {
         await db.query("UPDATE product SET ?, updated_at = ? WHERE id = ? ", [body, new Date(), id])
         res.json("product is id = "+ id +" updates")
     } catch (error) {
-        res.status(403).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -102,7 +102,7 @@ async function deleteProduct(req, res) {
         await db.query("DELETE FROM product WHERE id = ? ", id)
         res.json("product is id = "+ id +" deletes")
     } catch (error) {
-        res.status(403).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 

@@ -2,8 +2,8 @@ import db from "../config/db.config.js";
 
 async function createCategory(req, res) {
     try {
-        const {name_uz, name_ru, desc_shop_uz, desc_shop_ru, atrebuts_id, parent_id} = req.body
-        if (!name_uz || !name_ru || !desc_shop_uz || !desc_shop_ru || !atrebuts_id ) {
+        const {name_uz, name_ru, desc_shop_uz, desc_shop_ru, parent_id} = req.body
+        if (!name_uz || !name_ru || !desc_shop_uz || !desc_shop_ru ) {
             const error = new Error('body not found')
             error.status = 403
             throw error
@@ -15,7 +15,7 @@ async function createCategory(req, res) {
             throw error
         }
 
-        await db.query("INSERT INTO category SET ?", {name_uz, name_ru, desc_shop_uz, desc_shop_ru, atrebuts_id, parent_id})
+        await db.query("INSERT INTO category SET ?", {name_uz, name_ru, desc_shop_uz, desc_shop_ru, parent_id})
         res.json('created category')
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
@@ -113,7 +113,6 @@ export {
 //     "name_ru": "электроника",
 //     "desc_shop_uz": "mazda uzb",
 //     "desc_shop_ru": "Мазда Узб",
-//     "atrebuts_id": 1,
 //     "parent_id": null
 // }
 

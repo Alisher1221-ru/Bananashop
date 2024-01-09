@@ -12,3 +12,4 @@ productRoute.patch('/:id', authGuard, roleGuard, updateProduct)
 productRoute.delete('/:id', authGuard, roleGuard, deleteProduct)
 
 export default productRoute
+

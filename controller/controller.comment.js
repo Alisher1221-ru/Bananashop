@@ -2,13 +2,13 @@ import db from "../config/db.config.js"
 
 async function createComment(req, res){
     try {
-        const {parent_id, user_id, content, images, product_id, rating, answer_to} = req.body
-        if (!user_id || !content || !images || !product_id || !rating ) {
-            const error = new Error("there is already a user")
-            error.status = 402
+        const {content, images, product_id, rating, answer_to} = req.body
+        if (!product_id || !content) {
+            const error = new Error("body not found")
+            error.status = 403
             throw error
         }
-        await db.query("INSERT INTO comment SET ?", {parent_id, user_id, content, images, product_id, rating, answer_to})
+        await db.query("INSERT INTO comment SET ?", {user_id: req.id , content, images, product_id, rating, answer_to})
         res.json("created comment")
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
@@ -111,12 +111,11 @@ export {
 /////////// test commint
 
 // {
-//     "parent_id": null,
-//     "user_id": 14,
 //     "content": "lol",
 //     "images": "xax",
+//     "product_id": 1,
 //     "rating": 4.5,
-//     "answer_to": null
+//     "answer_to": 2
 // }
 
 ///////////

@@ -30,7 +30,7 @@ async function createUser(req, res) {
 
         res.json({accessToken, refreshToken})
     } catch (error) {
-        res.status(500).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -64,7 +64,7 @@ async function login(req, res) {
         await db.query("UPDATE users SET refresh_token = ?, password = ? WHERE id = ?", [hashingToken, hashingPassword, user.id])
         res.json({refreshToken, accessToken})
     } catch (error) {
-        res.status(500).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -92,7 +92,7 @@ async function refreshUser(req, res) {
 
         res.json({refreshToken, accessToken})
     } catch (error) {
-        res.status(500).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -102,7 +102,7 @@ async function getUsers(req, res) {
         res.json(users)
     } catch (error) {
         console.log(error);
-        res.status(500).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -118,7 +118,7 @@ async function getUser(req, res) {
         res.json(user)
     } catch (error) {
         console.log(error);
-        res.status(500).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -143,12 +143,12 @@ async function updateUser(req, res) {
             throw error
         }
 
-        if (req.role === "user" || req.id === user.id) {
-            await db.query("UPDATE users SET ?, updated_at = ? WHERE id = ?", [body, new Date(), user.id])
+        if(req.role === "admin") {
+            await db.query("UPDATE users SET ?, password = ?, update_at = ? WHERE id = ?", [body, new Date(), user.id])
             res.json(user.username + " the user has been updated")
         }
-        else if(req.role === "admin") {
-            await db.query("UPDATE users SET ?, password = ?, update_at = ? WHERE id = ?", [body, new Date(), user.id])
+        else if (req.id === user.id) {
+            await db.query("UPDATE users SET ?, updated_at = ? WHERE id = ?", [body, new Date(), user.id])
             res.json(user.username + " the user has been updated")
         }
         else{
@@ -158,7 +158,7 @@ async function updateUser(req, res) {
         }
     } catch (error) {
         console.log(error);
-        res.status(500).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 
@@ -216,7 +216,7 @@ async function logoutUser(req, res) {
 
         res.json("logout is profil")
     } catch (error) {
-        res.status(500).json({error: error.message})
+        res.status(error.status || 500).json({error: error.message})
     }
 }
 

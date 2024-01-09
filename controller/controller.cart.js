@@ -78,8 +78,19 @@ async function updateCart(req, res) {
             error.status = 402
             throw error
         }
-        await db.query("UPDATE cart SET ? WHERE id = ?", [body, id])
-        res.json("updated cart id = "+ id)
+        if (req.role === "admin") {
+            await db.query("UPDATE cart SET ? WHERE id = ?", [body, id])
+            res.json("updated cart id = "+ id)
+            return
+        }
+        if (req.id === adress.user_id) {
+            await db.query("UPDATE cart SET ? WHERE id = ?", [body, id])
+            res.json("updated cart id = "+ id)
+            return
+        }
+        const error = new Error("you are not the owner of this account")
+        error.status = 403
+        throw error
     } catch (error) {
         res.status(error.status).json({error:error.message})
     }
