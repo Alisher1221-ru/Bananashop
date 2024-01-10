@@ -6,8 +6,8 @@ import authGuard from "../middleware/user.guard.js"
 const OrderRouter = Router()
 
 OrderRouter.post('/', authGuard, createOrder)
-OrderRouter.get('/:id', getOrder)
-OrderRouter.get('/', getOrders)
+OrderRouter.get('/:id', authGuard, getOrder)
+OrderRouter.get('/', authGuard, getOrders)
 OrderRouter.patch('/:id', authGuard, roleGuard, updateOrder)
 OrderRouter.delete('/:id', authGuard, roleGuard, deleteOrder)
 

@@ -5,13 +5,13 @@ async function createAtrebuts(req, res) {
         const {name_uz, name_ru} = req.body
         if (!name_uz || !name_ru) {
             const error = new Error('body not found')
-            error.status = 403
+            error.status = 400
             throw error
         }
-        const [[atrebut]] = await db.query("SELECT * FROM attributes WHERE name_uz = ?", name_uz)
+        const [[atrebut]] = await db.query("SELECT * FROM attributes WHERE name_uz = ? OR name_ru = ?", [name_uz, name_ru])
         if (atrebut) {
             const error = new Error('there is an attribute')
-            error.status = 403
+            error.status = 400
             throw error
         }
 
@@ -46,8 +46,8 @@ async function getAttribute(req, res) {
         }
         const [[attribute]] = await db.query("SELECT * FROM attributes WHERE id = ?", id)
         if (!attribute) {
-            const error = new Error("attribute not fount")
-            error.status = 402
+            const error = new Error("attribute not found")
+            error.status = 404
             throw error
         }
         res.json(attribute)

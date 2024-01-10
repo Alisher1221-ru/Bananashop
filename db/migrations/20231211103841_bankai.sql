@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `product` (
   `desc_uz` varchar(255),
   `desc_ru` varchar(255),
   `view_count` integer,
-  `order_count` integer,
+  `orders_count` integer,
   `discount_in_perecnt` float,
   `remoining_count` integer,
   `created_at` datetime DEFAULT NOW(),
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS `attributes_value` (
   `atrebuts_id` integer
 );
 
-CREATE TABLE IF NOT EXISTS `order` (
+CREATE TABLE IF NOT EXISTS `orders` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
   `created_at` datetime DEFAULT NOW(),
   `updated_at` datetime DEFAULT NOW(),
@@ -189,13 +189,13 @@ ALTER TABLE `product_attributes_value` ADD FOREIGN KEY (`attributes_value_id`) R
 
 ALTER TABLE `attributes_value` ADD FOREIGN KEY (`atrebuts_id`) REFERENCES `attributes` (`id`)  ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `order` ADD FOREIGN KEY (`adress_id`) REFERENCES `Adress` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `orders` ADD FOREIGN KEY (`adress_id`) REFERENCES `Adress` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `order` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `orders` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `order` ADD FOREIGN KEY (`product`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `orders` ADD FOREIGN KEY (`product`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `order` ADD FOREIGN KEY (`delevery_id`) REFERENCES `delivery` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `orders` ADD FOREIGN KEY (`delevery_id`) REFERENCES `delivery` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `delivery` ADD FOREIGN KEY (`delevery_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 

@@ -8,15 +8,15 @@ async function createOrder(req, res) {
             error.status = 403
             throw error
         }
-        const [[order]] = await db.query("SELECT * FROM order WHERE user_id = ?", user_id)
-        if (order) {
-            const error = new Error('already have a order')
+        const [[orders]] = await db.query("SELECT * FROM orders WHERE product = ?", product)
+        if (orders) {
+            const error = new Error('already have a orders')
             error.status = 403
             throw error
         }
 
-        await db.query("INSERT INTO order SET ?", {adress_id, user_id, product, delevery_id, count, status})
-        res.json("create order")
+        await db.query("INSERT INTO orders SET ?", {adress_id, user_id, product, delevery_id, count, status})
+        res.json("create orders")
     } catch (error) {
         res.status(error.status || 500).json({error:error.message})
     }
@@ -24,13 +24,13 @@ async function createOrder(req, res) {
 
 async function getOrders(req, res) {
     try {
-        const [order] = await db.query("SELECT * FROM order")
-        if (!order) {
-            const error = new Error("order not fount")
+        const [orders] = await db.query("SELECT * FROM orders")
+        if (!orders) {
+            const error = new Error("orders not fount")
             error.status = 402
             throw error
         }
-        res.json(order)
+        res.json(orders)
     } catch (error) {
         res.status(error.status).json({error:error.message})
     }
@@ -44,13 +44,23 @@ async function getOrder(req, res) {
             error.status = 402
             throw error
         }
-        const [[order]] = await db.query("SELECT * FROM order WHERE id = ?", id)
-        if (!order) {
-            const error = new Error("order not fount")
+        const [[orders]] = await db.query("SELECT * FROM orders WHERE id = ?", id)
+        if (!orders) {
+            const error = new Error("orders not fount")
             error.status = 402
             throw error
         }
-        res.json(order)
+        if (req.role === "admin") {
+            res.json(orders)
+            return
+        }
+        if (orders.user_id === req.id) {
+            res.json(orders)
+            return
+        }
+        const error = new Error("this is not your order")
+        error.status = 404
+        throw error
     } catch (error) {
         res.status(error.status).json({error:error.message})
     }
@@ -64,9 +74,9 @@ async function updateOrder(req, res) {
             error.status = 402
             throw error
         }
-        const [[order]] = await db.query("SELECT * FROM order WHERE id = ?", id)
-        if (!order) {
-            const error = new Error("order not fount")
+        const [[orders]] = await db.query("SELECT * FROM orders WHERE id = ?", id)
+        if (!orders) {
+            const error = new Error("orders not fount")
             error.status = 402
             throw error
         }
@@ -76,8 +86,8 @@ async function updateOrder(req, res) {
             error.status = 402
             throw error
         }
-        await db.query("UPDATE order SET ? WHERE id = ?", [body, id])
-        res.json("updated order id = "+ id)
+        await db.query("UPDATE orders SET ? WHERE id = ?", [body, id])
+        res.json("updated orders id = "+ id)
     } catch (error) {
         res.status(error.status).json({error:error.message})
     }
@@ -91,8 +101,8 @@ async function deleteOrder(req, res) {
             error.status = 402
             throw error
         }
-        await db.query("DELETE FROM order WHERE id = ?", id)
-        res.json("updated order id = "+ id)
+        await db.query("DELETE FROM orders WHERE id = ?", id)
+        res.json("delete orders id = "+ id)
     } catch (error) {
         res.status(error.status).json({error:error.message})
     }
@@ -114,7 +124,7 @@ export {
 //     "product": [1,2],
 //     "delevery_id": 1,
 //     "count": 2,
-//     "status": "new"
+//     "status": "packing"
 // }
 
 //////////

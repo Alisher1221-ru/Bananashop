@@ -37,54 +37,6 @@ async function getProductEvents(req, res) {
     }
 }
 
-async function getProductEvent(req, res) {
-    try {
-        const id = req.params.id
-        if (!Math.floor(id) === id) {
-            const error = new Error("error is params")
-            error.status = 402
-            throw error
-        }
-        const [[product_event]] = await db.query("SELECT * FROM product_event WHERE id = ?", id)
-        if (!product_event) {
-            const error = new Error("product_event not found")
-            error.status = 403
-            throw error
-        }
-        res.json(product_event)
-    } catch (error) {
-        res.status(error.status || 500).json({error: error.message})
-    }
-}
-
-async function updateProductEvent(req, res) {
-    try {
-        const id = req.params.id
-        if (!Math.floor(id) === id) {
-            const error = new Error("params not found")
-            error.status = 402
-            throw error
-        }
-        const body = req.body
-        if (!body) {
-            const error = new Error("body not found")
-            error.status = 402
-            throw error
-        }
-        const [[product_event]] = await db.query("SELECT * FROM product_event WHERE id = ?", id)
-        if (!product_event) {
-            const error = new Error("product_event not found")
-            error.status = 402
-            throw error
-        }
-
-        await db.query("UPDATE product_event SET ?, updated_at = ? WHERE id = ? ", [body, new Date(), id])
-        res.json("product_event is id = "+ id +" updates")
-    } catch (error) {
-        res.status(error.status || 500).json({error: error.message})
-    }
-}
-
 async function deleteProductEvent(req, res) {
     try {
         const id = req.params.id
@@ -107,7 +59,7 @@ async function deleteProductEvent(req, res) {
     }
 }
 
-export {createProductEvent, getProductEvent, getProductEvents, updateProductEvent, deleteProductEvent}
+export {createProductEvent, getProductEvents, deleteProductEvent}
 
 /////////// test delevery
 

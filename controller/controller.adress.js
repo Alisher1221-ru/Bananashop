@@ -4,14 +4,14 @@ async function createAdress(req, res){
     try {
         const {region, city, street, house, room, name, user_id} = req.body
         if (!region || !city || !street || !house || !room || !name || !user_id) {
-            const error = new Error("there is already a user")
-            error.status = 402
+            const error = new Error("body not found")
+            error.status = 400
             throw error
         }
         const [[adress]] = await db.query("SELECT * FROM adress WHERE name = ?", name)
         if (adress) {
             const error = new Error("the address is already there")
-            error.status=402
+            error.status=400
             throw error
         }
         await db.query("INSERT INTO adress SET ?", {region, city, street, house, room, name, user_id})
@@ -26,7 +26,7 @@ async function getAdresss(req, res) {
         const [adress] = await db.query("SELECT * FROM adress")
         if (!adress) {
             const error = new Error("adress not found")
-            error.status = 403
+            error.status = 404
             throw error
         }
         res.json(adress)
@@ -40,13 +40,13 @@ async function getAdress(req, res) {
         const id = req.params.id
         if (!Math.floor(id) === id) {
             const error = new Error("error is params")
-            error.status = 402
+            error.status = 400
             throw error
         }
         const [[adress]] = await db.query("SELECT * FROM adress WHERE id = ?", id)
         if (!adress) {
             const error = new Error("adress not found")
-            error.status = 403
+            error.status = 404
             throw error
         }
         res.json(adress)
@@ -66,13 +66,13 @@ async function updateAdress(req, res) {
         const [[adress]] = await db.query("SELECT * FROM adress WHERE id = ?", id)
         if (!adress) {
             const error = new Error("adress not found")
-            error.status = 403
+            error.status = 404
             throw error
         }
         const body = req.body
         if (!body) {
             const error = new Error("body not found")
-            error.status = 403
+            error.status = 400
             throw error
         }
         if (req.role === "admin") {
@@ -85,7 +85,7 @@ async function updateAdress(req, res) {
             res.json("updated adress id = "+id)
             return
         }
-        const error = new Error("you are not the owner of this account")
+        const error = new Error("you are not the owner of this address")
         error.status = 403
         throw error
     } catch (error) {
@@ -118,7 +118,7 @@ async function deleteAdress(req, res) {
             res.json("delete adress id = "+id)
             return
         }
-        const error = new Error("you are not the owner of this account")
+        const error = new Error("you are not the owner of this address")
         error.status = 403
         throw error
     } catch (error) {
