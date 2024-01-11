@@ -1,4 +1,5 @@
 import db from "../config/db.config.js"
+import Pagination from "../helpers/pagination.js"
 
 async function createProductEvent(req, res) {
     try {
@@ -25,13 +26,14 @@ async function createProductEvent(req, res) {
 
 async function getProductEvents(req, res) {
     try {
-        const [product_event] = await db.query("SELECT * FROM product_event")
-        if (!product_event) {
-            const error = new Error("product_event not found")
-            error.status = 403
-            throw error
-        }
-        res.json(product_event)
+        const { page, limit } = req.query;
+        // Fetch the total count of records
+        const [[{ "COUNT(*)": totalItems }]] = await db.query("SELECT COUNT(*) FROM product_event");
+        // Create a Pagination object
+        const paginations = new Pagination(totalItems, page, limit);
+        // Fetch the paginated addresses
+        const [product_event] = await db.query("SELECT * FROM product_event LIMIT ? OFFSET ?", [paginations.limit, paginations.offset]);
+        res.json({ product_event, paginations }.product_event);
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
     }
@@ -39,21 +41,21 @@ async function getProductEvents(req, res) {
 
 async function deleteProductEvent(req, res) {
     try {
-        const id = req.params.id
-        if (!Math.floor(id) === id) {
-            const error = new Error("params not found")
-            error.status = 402
+        const {product_id, event_id} = req.query
+        if (!product_id || !event_id) {
+            const error = new Error("query not found")
+            error.status = 400
             throw error
         }
-        const [[product_event]] = await db.query("SELECT * FROM product_event WHERE id = ?", id)
+        const [[product_event]] = await db.query("SELECT * FROM product_event WHERE product_id = ? AND event_id = ?", [product_id, event_id])
         if (!product_event) {
             const error = new Error("product_event not found")
-            error.status = 402
+            error.status = 400
             throw error
         }
 
-        await db.query("DELETE FROM product_event WHERE id = ? ", id)
-        res.json("product_event is id = "+ id +" deletes")
+        await db.query("DELETE FROM product_event WHERE product_id = ? AND event_id = ?", [product_id, event_id])
+        res.json("product_event is deletes")
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
     }

@@ -15,6 +15,7 @@ import routercategoryAttributes from './router/router.categoryAttributes.js'
 import routerDelevery from './router/router.delevery.js'
 import productAttValueRoute from './router/router.productAttValue.js'
 import OrderRouter from './router/router.orders.js'
+import productEventRoute from './router/router.productEvent.js'
 
 const port = env.PORT
 
@@ -22,9 +23,10 @@ const appServer = express()
 
 appServer.use(express.json())
 appServer.use('/users', userRoute)
-appServer.use('/delevery', routerDelevery)
 appServer.use('/products', productRoute)
 appServer.use('/productsAttValue', productAttValueRoute)
+appServer.use('/productEvent', productEventRoute)
+appServer.use('/delevery', routerDelevery)
 appServer.use('/adress', adressRouter)
 appServer.use('/cart', cartRouter)
 appServer.use('/like', likeRouter)

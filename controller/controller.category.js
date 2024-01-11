@@ -1,4 +1,5 @@
 import db from "../config/db.config.js";
+import Pagination from "../helpers/pagination.js";
 
 async function createCategory(req, res) {
     try {
@@ -24,13 +25,14 @@ async function createCategory(req, res) {
 
 async function getCategorys(req, res) {
     try {
-        const [category] = await db.query("SELECT * FROM category")
-        if (!category) {
-            const error = new Error("category not fount")
-            error.status = 403
-            throw error
-        }
-        res.json(category)
+        const { page, limit } = req.query;
+        // Fetch the total count of records
+        const [[{ "COUNT(*)": totalItems }]] = await db.query("SELECT COUNT(*) FROM category");
+        // Create a Pagination object
+        const paginations = new Pagination(totalItems, page, limit);
+        // Fetch the paginated addresses
+        const [category] = await db.query("SELECT * FROM category LIMIT ? OFFSET ?", [paginations.limit, paginations.offset]);
+        res.json({ category, paginations }.category);
     } catch (error) {
         res.status(error.status || 500).json({error:error.message})
     }

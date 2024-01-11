@@ -15,7 +15,7 @@ async function createCatProd(req, res) {
         );
         if (chekbody) {
             const error = new Error("already in the database");
-            error.status = 403;
+            error.status = 400;
             throw error;
         }
         await db.query("INSERT INTO categorys_products SET ?", body);
@@ -67,7 +67,7 @@ async function getCatProds(req, res) {
         `;
         
         const [categorys_products] = await db.query(getQuery, [paginations.limit, paginations.offset]);
-        res.json({categorys_products, paginations});
+        res.json({categorys_products, paginations}.categorys_products);
     } catch (error) {
         res.status(error.status || 500).json({ error: error.message });
     }
@@ -78,13 +78,17 @@ async function deleteCatProd(req, res) {
         const query = req.query;
         if (!query) {
             const error = new Error("query not found");
-            error.status = 403;
+            error.status = 400;
             throw error;
         }
-        await db.query(
-            "DELETE FROM categorys_products WHERE product_id = ? AND category_id = ?",
-            [query.product_id, query.category_id]
-        );
+        const [[categorys_products]] = await db.query("SELECT * FROM categorys_products WHERE product_id = ? AND category_id = ?", [query.product_id, query.category_id])
+        if (!categorys_products) {
+            const error = new Error("categorys_products not found")
+            error.status = 400
+            throw error
+        }
+
+        await db.query("DELETE FROM categorys_products WHERE product_id = ? AND category_id = ?", [query.product_id, query.category_id]);
         res.json("delete categorys_products");
     } catch (error) {
         res.status(error.status || 500).json({ error: error.message });

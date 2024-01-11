@@ -1,4 +1,5 @@
 import db from "../config/db.config.js";
+import Pagination from "../helpers/pagination.js";
 
 async function createEvent(req, res) {
     try {
@@ -24,13 +25,14 @@ async function createEvent(req, res) {
 
 async function getEvents(req, res) {
     try {
-        const [event] = await db.query("SELECT * FROM event")
-        if (!event) {
-            const error = new Error("event not fount")
-            error.status = 403
-            throw error
-        }
-        res.json(event)
+        const { page, limit } = req.query;
+        // Fetch the total count of records
+        const [[{ "COUNT(*)": totalItems }]] = await db.query("SELECT COUNT(*) FROM event");
+        // Create a Pagination object
+        const paginations = new Pagination(totalItems, page, limit);
+        // Fetch the paginated addresses
+        const [event] = await db.query("SELECT * FROM event LIMIT ? OFFSET ?", [paginations.limit, paginations.offset]);
+        res.json({ event, paginations }.event);
     } catch (error) {
         res.status(error.status || 500).json({error:error.message})
     }

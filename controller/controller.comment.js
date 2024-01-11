@@ -1,4 +1,5 @@
 import db from "../config/db.config.js"
+import Pagination from "../helpers/pagination.js"
 
 async function createComment(req, res){
     try {
@@ -8,6 +9,7 @@ async function createComment(req, res){
             error.status = 403
             throw error
         }
+
         await db.query("INSERT INTO comment SET ?", {user_id: req.id , content, images, product_id, rating, answer_to})
         res.json("created comment")
     } catch (error) {
@@ -17,13 +19,14 @@ async function createComment(req, res){
 
 async function getComments(req, res) {
     try {
-        const [comment] = await db.query("SELECT * FROM comment")
-        if (!comment) {
-            const error = new Error("comment not found")
-            error.status = 403
-            throw error
-        }
-        res.json(comment)
+        const { page, limit } = req.query;
+        // Fetch the total count of records
+        const [[{ "COUNT(*)": totalItems }]] = await db.query("SELECT COUNT(*) FROM comment");
+        // Create a Pagination object
+        const paginations = new Pagination(totalItems, page, limit);
+        // Fetch the paginated addresses
+        const [comment] = await db.query("SELECT * FROM comment LIMIT ? OFFSET ?", [paginations.limit, paginations.offset]);
+        res.json({ comment, paginations }.comment);
     } catch (error) {
         res.status(403).json({error: error.message})
     }
@@ -70,8 +73,19 @@ async function updateComment(req, res) {
             throw error
         }
 
-        await db.query("UPDATE comment SET ? WHERE id = ?", [body, id])
-        res.json("updated comment id = "+id)
+        if (req.role === "admin") {
+            await db.query("UPDATE attributes SET ? WHERE id = ?", [body, id])
+            res.json("updated attribute id = "+ id)
+            return
+        }
+        if (req.id === comment.user_id) {
+            await db.query("UPDATE attributes SET ? WHERE id = ?", [body, id])
+            res.json("updated attribute id = "+ id)
+            return
+        }
+        const error = new Error("you are not the owner of this address")
+        error.status = 403
+        throw error
     } catch (error) {
         res.status(403).json({error: error.message})
     }
@@ -92,8 +106,19 @@ async function deleteComment(req, res) {
             throw error
         }
 
-        await db.query("DELETE FROM comment WHERE id = ?", id)
-        res.json("delete comment id = "+id)
+        if (req.role === "admin") {
+            await db.query("DELETE FROM comment WHERE id = ?", id)
+            res.json("delete comment id = "+id)
+            return
+        }
+        if (req.id === comment.user_id) {
+            await db.query("DELETE FROM comment WHERE id = ?", id)
+            res.json("delete comment id = "+id)
+            return
+        }
+        const error = new Error("you are not the owner of this address")
+        error.status = 403
+        throw error
     } catch (error) {
         res.status(403).json({error: error.message})
     }

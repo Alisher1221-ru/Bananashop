@@ -6,8 +6,8 @@ import authGuard from "../middleware/user.guard.js"
 const likeRouter = Router()
 
 likeRouter.post('/', authGuard, roleGuard, createLike)
-likeRouter.get('/:id', getLikes)
-likeRouter.get('/', getLike)
+likeRouter.get('/:id', getLike)
+likeRouter.get('/', getLikes)
 likeRouter.patch('/:id', authGuard, roleGuard, updateLike)
 likeRouter.delete('/:id', authGuard, roleGuard, deleteLike)
 

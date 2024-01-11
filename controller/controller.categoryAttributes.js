@@ -56,7 +56,7 @@ async function getCategorysAttributes(req, res) {
         `;
         
         const [categorys_attributes] = await db.query(getQuery, [paginations.limit, paginations.offset]);
-        res.json({categorys_attributes, paginations});
+        res.json({categorys_attributes, paginations}.categorys_attributes);
     }catch (error) {
         res.status(error.status || 500).json({error:error.message})
     }
@@ -64,14 +64,21 @@ async function getCategorysAttributes(req, res) {
 
 async function deleteCategorysAttributes(req, res) {
     try {
-        const id = req.params.id
-        if (!Math.floor(id) === id) {
-            const error = new Error("params not fount")
-            error.status = 402
+        const query = req.query;
+        if (!query) {
+            const error = new Error("query not found");
+            error.status = 400;
+            throw error;
+        }
+        const [[categorys_attributes]] = await db.query("SELECT * FROM categorys_attributes WHERE attributes_id = ? AND category_id = ?", [query.attributes_id, query.category_id])
+        if (!categorys_attributes) {
+            const error = new Error("categorys_attributes not found")
+            error.status = 400
             throw error
         }
-        await db.query("DELETE FROM categorys_attributes WHERE id = ?", id)
-        res.json("delete categorys_attributes id = "+ id)
+
+        await db.query("DELETE FROM categorys_attributes WHERE attributes_id = ? AND category_id = ?", [query.attributes_id, query.category_id]);
+        res.json("delete categorys_attributes");
     } catch (error) {
         res.status(error.status || 500).json({error:error.message})
     }

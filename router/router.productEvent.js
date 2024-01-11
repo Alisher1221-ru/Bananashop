@@ -1,15 +1,13 @@
 import {Router} from "express"
 import authGuard from '../middleware/user.guard.js'
 import roleGuard from '../middleware/role.guard.js'
-import { createProductEvent, getProductEvent, getProductEvents, updateProductEvent, deleteProductEvent } from "../controller/controller.productevent.js"
+import { createProductEvent, getProductEvents, deleteProductEvent } from "../controller/controller.productevent.js"
 
-const productAttValueRoute = Router()
+const productEventRoute = Router()
 
-productAttValueRoute.post('/', authGuard, roleGuard, createProductEvent)
-productAttValueRoute.get('/:id', getProductEvent)
-productAttValueRoute.get('/', getProductEvents)
-productAttValueRoute.patch('/:id', authGuard, roleGuard, updateProductEvent)
-productAttValueRoute.delete('/:id', authGuard, roleGuard, deleteProductEvent)
+productEventRoute.post('/', authGuard, roleGuard, createProductEvent)
+productEventRoute.get('/', getProductEvents)
+productEventRoute.delete('/', authGuard, roleGuard, deleteProductEvent)
 
-export default productAttValueRoute
+export default productEventRoute
 

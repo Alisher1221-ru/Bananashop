@@ -1,4 +1,5 @@
 import db from "../config/db.config.js"
+import Pagination from "../helpers/pagination.js"
 
 async function createAdress(req, res){
     try {
@@ -8,12 +9,7 @@ async function createAdress(req, res){
             error.status = 400
             throw error
         }
-        const [[adress]] = await db.query("SELECT * FROM adress WHERE name = ?", name)
-        if (adress) {
-            const error = new Error("the address is already there")
-            error.status=400
-            throw error
-        }
+
         await db.query("INSERT INTO adress SET ?", {region, city, street, house, room, name, user_id})
         res.json("created adress")
     } catch (error) {
@@ -23,13 +19,14 @@ async function createAdress(req, res){
 
 async function getAdresss(req, res) {
     try {
-        const [adress] = await db.query("SELECT * FROM adress")
-        if (!adress) {
-            const error = new Error("adress not found")
-            error.status = 404
-            throw error
-        }
-        res.json(adress)
+        const { page, limit } = req.query;
+        // Fetch the total count of records
+        const [[{ "COUNT(*)": totalItems }]] = await db.query("SELECT COUNT(*) FROM adress");
+        // Create a Pagination object
+        const paginations = new Pagination(totalItems, page, limit);
+        // Fetch the paginated addresses
+        const [addresses] = await db.query("SELECT * FROM adress LIMIT ? OFFSET ?", [paginations.limit, paginations.offset]);
+        res.json({ addresses, paginations }.addresses);
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
     }

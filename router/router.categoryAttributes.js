@@ -7,7 +7,7 @@ const routercategoryAttributes = Router()
 
 routercategoryAttributes.post('/', authGuard, roleGuard, createCategorysAttributes)
 routercategoryAttributes.get('/', getCategorysAttributes)
-routercategoryAttributes.delete('/:id', authGuard, roleGuard, deleteCategorysAttributes)
+routercategoryAttributes.delete('/', authGuard, roleGuard, deleteCategorysAttributes)
 
 
 export default routercategoryAttributes

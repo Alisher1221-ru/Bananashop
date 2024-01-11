@@ -1,16 +1,11 @@
 import db from "../config/db.config.js";
+import Pagination from "../helpers/pagination.js";
 
 async function createAtrebuts(req, res) {
     try {
         const {name_uz, name_ru} = req.body
         if (!name_uz || !name_ru) {
             const error = new Error('body not found')
-            error.status = 400
-            throw error
-        }
-        const [[atrebut]] = await db.query("SELECT * FROM attributes WHERE name_uz = ? OR name_ru = ?", [name_uz, name_ru])
-        if (atrebut) {
-            const error = new Error('there is an attribute')
             error.status = 400
             throw error
         }
@@ -24,13 +19,14 @@ async function createAtrebuts(req, res) {
 
 async function getAttributes(req, res) {
     try {
-        const [attribute] = await db.query("SELECT * FROM attributes")
-        if (!attribute) {
-            const error = new Error("attribute not fount")
-            error.status = 402
-            throw error
-        }
-        res.json(attribute)
+        const { page, limit } = req.query;
+        // Fetch the total count of records
+        const [[{ "COUNT(*)": totalItems }]] = await db.query("SELECT COUNT(*) FROM attributes");
+        // Create a Pagination object
+        const paginations = new Pagination(totalItems, page, limit);
+        // Fetch the paginated addresses
+        const [attributes] = await db.query("SELECT * FROM attributes LIMIT ? OFFSET ?", [paginations.limit, paginations.offset]);
+        res.json({ attributes, paginations }.attributes);
     } catch (error) {
         res.status(error.status).json({error:error.message})
     }
@@ -76,8 +72,20 @@ async function updateAttributes(req, res) {
             error.status = 402
             throw error
         }
-        await db.query("UPDATE attributes SET ? WHERE id = ?", [body, id])
-        res.json("updated attribute id = "+ id)
+
+        if (req.role === "admin") {
+            await db.query("UPDATE attributes SET ? WHERE id = ?", [body, id])
+            res.json("updated attribute id = "+ id)
+            return
+        }
+        if (req.id === attribute.user_id) {
+            await db.query("UPDATE attributes SET ? WHERE id = ?", [body, id])
+            res.json("updated attribute id = "+ id)
+            return
+        }
+        const error = new Error("you are not the owner of this address")
+        error.status = 403
+        throw error
     } catch (error) {
         res.status(error.status).json({error:error.message})
     }
@@ -91,10 +99,29 @@ async function deleteAttributes(req, res) {
             error.status = 402
             throw error
         }
-        await db.query("DELETE FROM attributes WHERE id = ?", id)
-        res.json("updated attribute id = "+ id)
+
+        const [[attribute]] = await db.query("SELECT * FROM attributes WHERE id = ?", id)
+        if (!attribute) {
+            const error = new Error('attributes not found')
+            error.status = 400
+            throw error
+        }
+
+        if (req.role === "admin") {
+            await db.query("DELETE FROM attributes WHERE id = ?", id)
+            res.json("delete attribute id = "+ id)
+            return
+        }
+        if (req.id === attribute.user_id) {
+            await db.query("DELETE FROM attributes WHERE id = ?", id)
+            res.json("delete attribute id = "+ id)
+            return
+        }
+        const error = new Error("you are not the owner of this address")
+        error.status = 403
+        throw error
     } catch (error) {
-        res.status(error.status).json({error:error.message})
+        res.status(error.status || 500).json({error:error.message})
     }
 }
 

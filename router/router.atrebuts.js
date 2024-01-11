@@ -5,11 +5,11 @@ import roleGuard from "../middleware/role.guard.js";
 
 const routerAtrebuts = Router()
 
-routerAtrebuts.post('/', authGuard, roleGuard, createAtrebuts)
+routerAtrebuts.post('/', authGuard, createAtrebuts)
 routerAtrebuts.get('/:id', getAttribute)
 routerAtrebuts.get('/', getAttributes)
-routerAtrebuts.patch('/:id', authGuard, roleGuard, updateAttributes)
-routerAtrebuts.delete('/:id', authGuard, roleGuard, deleteAttributes)
+routerAtrebuts.patch('/:id', authGuard, updateAttributes)
+routerAtrebuts.delete('/:id', authGuard, deleteAttributes)
 
 
 export default routerAtrebuts

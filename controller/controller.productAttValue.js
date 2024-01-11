@@ -64,30 +64,29 @@ async function getProductAttValue(req, res) {
         `;
 
         const [product_attributes_value] = await db.query(getQuery, [paginations.limit, paginations.offset]);
-        res.json({product_attributes_value, paginations});
+        res.json({product_attributes_value, paginations}.product_attributes_value);
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
     }
 }
 
-
 async function deleteProductAttValue(req, res) {
     try {
-        const id = req.params.id
-        if (!Math.floor(id) === id) {
-            const error = new Error("params not found")
-            error.status = 402
+        const {product_id, attributes_value_id} = req.query
+        if (!product_id || !attributes_value_id) {
+            const error = new Error("query not found")
+            error.status = 400
             throw error
         }
-        const [[product_attributes_value]] = await db.query("SELECT * FROM product_attributes_value WHERE id = ?", id)
+        const [[product_attributes_value]] = await db.query("SELECT * FROM product_attributes_value WHERE product_id = ? AND attributes_value_id = ?", [product_id, attributes_value_id])
         if (!product_attributes_value) {
             const error = new Error("product_attributes_value not found")
-            error.status = 402
+            error.status = 400
             throw error
         }
 
-        await db.query("DELETE FROM product_attributes_value WHERE id = ? ", id)
-        res.json("product_attributes_value is id = "+ id +" deletes")
+        await db.query("DELETE FROM product_attributes_value WHERE product_id = ? AND attributes_value_id = ?", [product_id, attributes_value_id])
+        res.json("product_attributes_value is deletes")
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
     }

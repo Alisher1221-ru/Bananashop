@@ -7,7 +7,7 @@ const productAttValueRoute = Router()
 
 productAttValueRoute.post('/', authGuard, roleGuard, createProductAttValue)
 productAttValueRoute.get('/', getProductAttValue)
-productAttValueRoute.delete('/:id', authGuard, roleGuard, deleteProductAttValue)
+productAttValueRoute.delete('/', authGuard, roleGuard, deleteProductAttValue)
 
 export default productAttValueRoute
 
